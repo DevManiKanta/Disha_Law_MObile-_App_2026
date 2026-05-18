@@ -1,685 +1,585 @@
 import React, { forwardRef, useEffect, useMemo, useState } from "react";
-  
-  import BottomSheet, {
-    BottomSheetScrollView,
-    BottomSheetTextInput,
-} from "@gorhom/bottom-sheet";
-  
-  import {
-    Modal,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Alert,
+  Modal,
 } from "react-native";
-  
-  import { Ionicons } from "@expo/vector-icons";
-  import { Calendar } from "react-native-calendars";
-  import DateTimePicker from "@react-native-community/datetimepicker";
-  
-  const AddAppointmentSheet = forwardRef(
-    ({ prefill, variant = "appointment" }, ref) => {
-      const snapPoints = useMemo(
-        () => ["85%"],
-        []
-      );
-  
-      const [appointmentType, setAppointmentType] =
-        useState("Online");
-      const [clientMode, setClientMode] = useState("New"); // New | Old
-      const [feeAmount, setFeeAmount] = useState("");
-      const [paymentMethod, setPaymentMethod] = useState("Cash"); // Cash | Online
-      const [clientName, setClientName] = useState("");
-      const [clientPhone, setClientPhone] = useState("");
-      const [callStatus, setCallStatus] = useState("Answered"); // Answered | Not Answered | Busy
-      const [followupOutcome, setFollowupOutcome] = useState("Coming"); // Coming | Not Coming | Reschedule
-      const [appointmentDate, setAppointmentDate] = useState(""); // YYYY-MM-DD
-      const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-      const [draftDate, setDraftDate] = useState(null); // "YYYY-MM-DD" | null
-      const [appointmentTime, setAppointmentTime] = useState(""); // e.g. 10:30 AM
-      const [isTimeOpen, setIsTimeOpen] = useState(false);
-      const [draftTime, setDraftTime] = useState(new Date());
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { Calendar } from "react-native-calendars";
 
-      const SheetTextInput = Platform.OS === "web" ? TextInput : BottomSheetTextInput;
+const AddAppointmentSheet = forwardRef(
+  ({ prefill, onSave }, ref) => {
+    const snapPoints = useMemo(() => ["90%"], []);
 
-      const appointmentDateDisplay = useMemo(() => {
-        if (!appointmentDate) return "";
-        // YYYY-MM-DD -> DD/MM/YYYY
-        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(appointmentDate);
-        if (!m) return appointmentDate;
-        return `${m[3]}/${m[2]}/${m[1]}`;
-      }, [appointmentDate]);
+    const [clientName, setClientName] = useState("");
+    const [clientPhone, setClientPhone] = useState("");
+    const [appointmentDate, setAppointmentDate] = useState("");
+    const [appointmentTime, setAppointmentTime] = useState("");
+    const [appointmentType, setAppointmentType] = useState("Online");
+    const [clientType, setClientType] = useState("New");
+    const [status, setStatus] = useState("Pending");
+    const [fee, setFee] = useState("");
+    const [notes, setNotes] = useState("");
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-      const appointmentTimeDisplay = useMemo(() => {
-        return appointmentTime || "";
-      }, [appointmentTime]);
+    useEffect(() => {
+      if (prefill) {
+        setClientName(prefill.name || "");
+        setClientPhone(prefill.phone || "");
+      }
+    }, [prefill]);
 
-      const formatTime = (dateObj) => {
-        try {
-          return dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-        } catch {
-          return "";
-        }
+    const handleSave = () => {
+      if (!clientName.trim()) {
+        Alert.alert("Error", "Please enter client name");
+        return;
+      }
+      if (!appointmentDate.trim()) {
+        Alert.alert("Error", "Please select appointment date");
+        return;
+      }
+      if (!appointmentTime.trim()) {
+        Alert.alert("Error", "Please enter appointment time");
+        return;
+      }
+
+      const appointmentData = {
+        clientName: clientName.trim(),
+        clientPhone: clientPhone.trim(),
+        date: appointmentDate,
+        time: appointmentTime,
+        type: appointmentType,
+        clientType: clientType,
+        status: status,
+        fee: fee || "0",
+        notes: notes.trim(),
       };
 
-      useEffect(() => {
-        if (!prefill) return;
-        if (prefill.mode === "Old") setClientMode("Old");
-        if (prefill.mode === "New") setClientMode("New");
-        if (typeof prefill.name === "string") setClientName(prefill.name);
-        if (typeof prefill.phone === "string") setClientPhone(prefill.phone);
-      }, [prefill]);
-  
-      return (
-        <BottomSheet
-          ref={ref}
-          index={-1}
-          snapPoints={snapPoints}
-          enablePanDownToClose
-          keyboardBehavior="interactive"
-          backgroundStyle={styles.sheetBackground}
+      onSave?.(appointmentData);
+      resetForm();
+      ref.current?.close();
+      Alert.alert("Success", "Appointment scheduled successfully!");
+    };
+
+    const resetForm = () => {
+      setAppointmentDate("");
+      setAppointmentTime("");
+      setAppointmentType("Online");
+      setClientType("New");
+      setStatus("Pending");
+      setFee("");
+      setNotes("");
+    };
+
+    return (
+      <BottomSheet
+        ref={ref}
+        index={-1}
+        snapPoints={snapPoints}
+        enablePanDownToClose
+        keyboardBehavior="interactive"
+        backgroundStyle={styles.sheetBackground}
+      >
+        <BottomSheetScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
         >
-          <BottomSheetScrollView
-            contentContainerStyle={styles.content}
-            keyboardShouldPersistTaps="handled"
-          >
-            <Text style={styles.title}>
-              {variant === "followup" ? "Add Follow-up" : "Add Appointment"}
-            </Text>
-  
-            {variant !== "followup" && (
-              <>
-                {/* TYPE */}
-                <Text style={styles.label}>Appointment Type</Text>
-                <View style={styles.row}>
-                  {["Online", "Offline"].map((item) => (
+          {/* HEADER */}
+          <View style={styles.header}>
+            <Text style={styles.title}>Schedule Appointment</Text>
+            <Text style={styles.subtitle}>Fill in the details below</Text>
+          </View>
+
+          {/* CLIENT INFO */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Client Information</Text>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Client Name</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="person-outline" size={18} color="#3b82f6" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter client name"
+                  placeholderTextColor="#94a3b8"
+                  value={clientName}
+                  onChangeText={setClientName}
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Phone Number</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="call-outline" size={18} color="#3b82f6" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter phone number"
+                  placeholderTextColor="#94a3b8"
+                  value={clientPhone}
+                  onChangeText={setClientPhone}
+                  keyboardType="phone-pad"
+                />
+              </View>
+            </View>
+          </View>
+
+          {/* APPOINTMENT DETAILS */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Appointment Details</Text>
+
+            {/* DATE PICKER */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Date</Text>
+              <TouchableOpacity
+                style={styles.datePickerButton}
+                onPress={() => setIsCalendarOpen(true)}
+              >
+                <Ionicons name="calendar-outline" size={18} color="#3b82f6" />
+                <View style={styles.datePickerContent}>
+                  <Text style={styles.datePickerLabel}>Select Date</Text>
+                  <Text style={styles.datePickerValue}>
+                    {appointmentDate || "Tap to select date"}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Time (HH:MM)</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="time-outline" size={18} color="#3b82f6" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="10:30"
+                  placeholderTextColor="#94a3b8"
+                  value={appointmentTime}
+                  onChangeText={setAppointmentTime}
+                />
+              </View>
+            </View>
+
+            {/* TYPE, CLIENT TYPE & STATUS ROW */}
+            <View style={styles.row}>
+              <View style={[styles.inputGroup, { flex: 1 }]}>
+                <Text style={styles.label}>Type</Text>
+                <View style={styles.buttonGroup}>
+                  {["Online", "Offline"].map((type) => (
                     <TouchableOpacity
-                      key={item}
-                      style={[styles.optionButton, appointmentType === item && styles.activeButton]}
-                      onPress={() => setAppointmentType(item)}
-                      activeOpacity={0.85}
+                      key={type}
+                      style={[
+                        styles.typeButton,
+                        appointmentType === type && styles.typeButtonActive,
+                      ]}
+                      onPress={() => setAppointmentType(type)}
                     >
-                      <Text style={[styles.optionText, appointmentType === item && styles.activeText]}>
-                        {item}
+                      <Text
+                        style={[
+                          styles.typeButtonText,
+                          appointmentType === type && styles.typeButtonTextActive,
+                        ]}
+                      >
+                        {type}
                       </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
-              </>
-            )}
-  
-            {/* CLIENT MODE */}
-            <Text style={styles.label}>Client</Text>
-            <View style={styles.row}>
-              {["New", "Old"].map((item) => (
-                <TouchableOpacity
-                  key={item}
-                  style={[styles.optionButton, clientMode === item && styles.activeButton]}
-                  onPress={() => setClientMode(item)}
-                  activeOpacity={0.85}
-                >
-                  <Text style={[styles.optionText, clientMode === item && styles.activeText]}>
-                    {item === "New" ? "New Client" : "Existing Client"}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+              </View>
 
-            {clientMode === "Old" ? (
-              <>
-                <Text style={styles.label}>Select Client</Text>
-                <SheetTextInput
-                  placeholder="Search client name / phone"
-                  style={styles.input}
-                />
-              </>
-            ) : (
-              <>
-                {/* CLIENT NAME */}
-                <Text style={styles.label}>Client Name</Text>
-                <SheetTextInput
-                  value={clientName}
-                  onChangeText={setClientName}
-                  placeholder="Enter client name"
-                  style={styles.input}
-                />
-
-                {/* PHONE */}
-                <Text style={styles.label}>Phone</Text>
-                <SheetTextInput
-                  value={clientPhone}
-                  onChangeText={setClientPhone}
-                  placeholder="Enter phone"
-                  keyboardType="phone-pad"
-                  style={styles.input}
-                />
-              </>
-            )}
-
-            {variant === "followup" ? (
-              <>
-                {/* CALL STATUS */}
-                <Text style={styles.label}>Call Status</Text>
-                <View style={styles.row}>
-                  {["Answered", "Not Answered", "Busy"].map((item) => {
-                    const isActive = callStatus === item;
-                    return (
-                      <TouchableOpacity
-                        key={item}
-                        style={[styles.optionButton, isActive && styles.activeButton]}
-                        onPress={() => setCallStatus(item)}
-                        activeOpacity={0.85}
-                      >
-                        <Text style={[styles.optionText, isActive && styles.activeText]}>{item}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-
-                {/* OUTCOME */}
-                <Text style={styles.label}>Client Coming?</Text>
-                <View style={styles.row}>
-                  {["Coming", "Not Coming", "Reschedule"].map((item) => {
-                    const isActive = followupOutcome === item;
-                    return (
-                      <TouchableOpacity
-                        key={item}
-                        style={[styles.optionButton, isActive && styles.activeButton]}
-                        onPress={() => setFollowupOutcome(item)}
-                        activeOpacity={0.85}
-                      >
-                        <Text style={[styles.optionText, isActive && styles.activeText]}>{item}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              </>
-            ) : (
-              <>
-                {/* DATE */}
-                <Text style={styles.label}>Appointment Date</Text>
-                <Pressable
-                  style={styles.datePickRow}
-                  onPress={() => {
-                    setDraftDate(appointmentDate || null);
-                    setIsCalendarOpen(true);
-                  }}
-                >
-                  <View style={styles.datePickLeft}>
-                    <Ionicons name="calendar-outline" size={18} color="#6b7280" />
-                    <Text style={styles.datePickText}>
-                      {appointmentDate ? appointmentDateDisplay : "Select date"}
-                    </Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
-                </Pressable>
-
-                {/* TIME */}
-                <Text style={styles.label}>Appointment Time</Text>
-                {Platform.OS === "web" ? (
-                  <SheetTextInput
-                    placeholder="10:30 AM"
-                    value={appointmentTimeDisplay}
-                    onChangeText={setAppointmentTime}
-                    style={styles.input}
-                  />
-                ) : (
-                  <>
-                    <Pressable
-                      style={styles.datePickRow}
-                      onPress={() => {
-                        setDraftTime(new Date());
-                        setIsTimeOpen(true);
-                      }}
+              <View style={[styles.inputGroup, { flex: 1, marginLeft: 12 }]}>
+                <Text style={styles.label}>Client</Text>
+                <View style={styles.buttonGroup}>
+                  {["New", "Old"].map((type) => (
+                    <TouchableOpacity
+                      key={type}
+                      style={[
+                        styles.typeButton,
+                        clientType === type && styles.typeButtonActive,
+                      ]}
+                      onPress={() => setClientType(type)}
                     >
-                      <View style={styles.datePickLeft}>
-                        <Ionicons name="time-outline" size={18} color="#6b7280" />
-                        <Text style={styles.datePickText}>
-                          {appointmentTime ? appointmentTimeDisplay : "Select time"}
-                        </Text>
-                      </View>
-                      <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
-                    </Pressable>
-
-                    {/* Android shows native dialog when rendered */}
-                    {Platform.OS === "android" && isTimeOpen && (
-                      <DateTimePicker
-                        value={draftTime}
-                        mode="time"
-                        is24Hour={false}
-                        display="default"
-                        onChange={(event, selectedDate) => {
-                          if (event?.type === "dismissed") {
-                            setIsTimeOpen(false);
-                            return;
-                          }
-                          const dt = selectedDate || draftTime;
-                          setDraftTime(dt);
-                          setAppointmentTime(formatTime(dt));
-                          setIsTimeOpen(false);
-                        }}
-                      />
-                    )}
-
-                    {/* iOS in modal */}
-                    {Platform.OS === "ios" && (
-                      <Modal
-                        visible={isTimeOpen}
-                        animationType="slide"
-                        transparent
-                        onRequestClose={() => setIsTimeOpen(false)}
+                      <Text
+                        style={[
+                          styles.typeButtonText,
+                          clientType === type && styles.typeButtonTextActive,
+                        ]}
                       >
-                        <Pressable style={styles.modalBackdrop} onPress={() => setIsTimeOpen(false)} />
-                        <View style={styles.modalSheet}>
-                          <View style={styles.modalHeader}>
-                            <View>
-                              <Text style={styles.modalTitle}>Select time</Text>
-                              <Text style={styles.modalSubtitle}>Pick appointment time</Text>
-                            </View>
-                            <TouchableOpacity
-                              activeOpacity={0.85}
-                              style={styles.modalClose}
-                              onPress={() => setIsTimeOpen(false)}
-                            >
-                              <Ionicons name="close" size={18} color="#0f172a" />
-                            </TouchableOpacity>
-                          </View>
-
-                          <View style={{ paddingHorizontal: 16, paddingTop: 14 }}>
-                            <DateTimePicker
-                              value={draftTime}
-                              mode="time"
-                              is24Hour={false}
-                              display="spinner"
-                              onChange={(_, selectedDate) => {
-                                if (!selectedDate) return;
-                                setDraftTime(selectedDate);
-                              }}
-                            />
-                          </View>
-
-                          <View style={styles.modalFooter}>
-                            <TouchableOpacity
-                              activeOpacity={0.9}
-                              style={styles.modalGhost}
-                              onPress={() => setIsTimeOpen(false)}
-                            >
-                              <Text style={styles.modalGhostText}>Cancel</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                              activeOpacity={0.9}
-                              style={styles.modalPrimary}
-                              onPress={() => {
-                                setAppointmentTime(formatTime(draftTime));
-                                setIsTimeOpen(false);
-                              }}
-                            >
-                              <Text style={styles.modalPrimaryText}>Use time</Text>
-                            </TouchableOpacity>
-                          </View>
-                        </View>
-                      </Modal>
-                    )}
-                  </>
-                )}
-              </>
-            )}
-
-            {/* FEE */}
-            <Text style={styles.label}>Fee Amount</Text>
-            <View style={styles.inputWithIcon}>
-              <Ionicons name="cash-outline" size={18} color="#6b7280" />
-              <SheetTextInput
-                value={feeAmount}
-                onChangeText={setFeeAmount}
-                placeholder="₹0"
-                keyboardType="numeric"
-                style={styles.inputInline}
-              />
+                        {type}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
             </View>
 
-            {/* PAYMENT METHOD */}
-            <Text style={styles.label}>Payment Method</Text>
-            <View style={styles.row}>
-              {["Cash", "Online"].map((item) => {
-                const isActive = paymentMethod === item;
-                return (
+            {/* STATUS */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Status</Text>
+              <View style={styles.buttonGroup}>
+                {["Pending", "Confirmed"].map((s) => (
                   <TouchableOpacity
-                    key={item}
-                    style={[styles.optionButton, isActive && styles.activeButton]}
-                    onPress={() => setPaymentMethod(item)}
-                    activeOpacity={0.85}
+                    key={s}
+                    style={[
+                      styles.typeButton,
+                      status === s && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setStatus(s)}
                   >
-                    <Text style={[styles.optionText, isActive && styles.activeText]}>
-                      {item === "Online" ? "Online Payment" : "Cash"}
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        status === s && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      {s}
                     </Text>
                   </TouchableOpacity>
-                );
-              })}
+                ))}
+              </View>
             </View>
-  
-            {/* REMARKS */}
-            <Text style={styles.label}>
-              Remarks
-            </Text>
-  
-            <SheetTextInput
-              multiline
-              numberOfLines={4}
-              placeholder="Enter remarks"
-              style={styles.textArea}
-            />
-  
-            {/* SAVE */}
-            <TouchableOpacity
-              style={styles.saveButton}
-            >
-              <Ionicons
-                name="calendar"
-                size={20}
-                color="#fff"
+          </View>
+
+          {/* ADDITIONAL INFO */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Additional Information</Text>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Fee (Optional)</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="cash-outline" size={18} color="#3b82f6" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter fee amount"
+                  placeholderTextColor="#94a3b8"
+                  value={fee}
+                  onChangeText={setFee}
+                  keyboardType="decimal-pad"
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Notes (Optional)</Text>
+              <TextInput
+                style={[styles.input, styles.notesInput]}
+                placeholder="Add any notes or remarks..."
+                placeholderTextColor="#94a3b8"
+                value={notes}
+                onChangeText={setNotes}
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
               />
-  
-              <Text style={styles.saveText}>
-                {variant === "followup" ? "Save Follow-up" : "Save Appointment"}
-              </Text>
+            </View>
+          </View>
+
+          {/* ACTION BUTTONS */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => ref.current?.close()}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
 
-            <Modal
-              visible={isCalendarOpen}
-              animationType="slide"
-              transparent
-              onRequestClose={() => setIsCalendarOpen(false)}
+            <LinearGradient
+              colors={["#3b82f6", "#2563eb"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.saveButtonGradient}
             >
-              <Pressable style={styles.modalBackdrop} onPress={() => setIsCalendarOpen(false)} />
-              <View style={styles.modalSheet}>
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={handleSave}
+              >
+                <Ionicons name="checkmark" size={20} color="#fff" />
+                <Text style={styles.saveButtonText}>Save Appointment</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+          </View>
+
+          {/* CALENDAR MODAL */}
+          <Modal
+            visible={isCalendarOpen}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setIsCalendarOpen(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
-                  <View>
-                    <Text style={styles.modalTitle}>Select date</Text>
-                    <Text style={styles.modalSubtitle}>Tap any date to select</Text>
-                  </View>
+                  <Text style={styles.modalTitle}>Select Date</Text>
                   <TouchableOpacity
-                    activeOpacity={0.85}
-                    style={styles.modalClose}
                     onPress={() => setIsCalendarOpen(false)}
+                    style={styles.modalCloseBtn}
                   >
-                    <Ionicons name="close" size={18} color="#0f172a" />
+                    <Ionicons name="close" size={24} color="#0f172a" />
                   </TouchableOpacity>
                 </View>
 
                 <Calendar
-                  markedDates={
-                    draftDate
-                      ? {
-                          [draftDate]: {
-                            selected: true,
-                            selectedColor: "#111827",
-                            selectedTextColor: "#fff",
-                          },
-                        }
-                      : {}
-                  }
-                  enableSwipeMonths
-                  hideExtraDays
-                  firstDay={1}
+                  current={appointmentDate || new Date().toISOString().split("T")[0]}
+                  onDayPress={(day) => {
+                    setAppointmentDate(day.dateString);
+                    setIsCalendarOpen(false);
+                  }}
                   theme={{
-                    backgroundColor: "#ffffff",
-                    calendarBackground: "#ffffff",
-                    textSectionTitleColor: "#6b7280",
-                    selectedDayBackgroundColor: "#111827",
-                    selectedDayTextColor: "#ffffff",
-                    todayTextColor: "#111827",
-                    dayTextColor: "#111827",
+                    backgroundColor: "#fff",
+                    calendarBackground: "#fff",
+                    textSectionTitleColor: "#0f172a",
+                    selectedDayBackgroundColor: "#3b82f6",
+                    selectedDayTextColor: "#fff",
+                    todayTextColor: "#3b82f6",
+                    dayTextColor: "#0f172a",
                     textDisabledColor: "#cbd5e1",
-                    arrowColor: "#111827",
-                    monthTextColor: "#111827",
+                    monthTextColor: "#0f172a",
+                    arrowColor: "#3b82f6",
                     textMonthFontWeight: "800",
                     textDayFontWeight: "600",
-                    textDayHeaderFontWeight: "800",
-                  }}
-                  onDayPress={(day) => {
-                    const picked = day?.dateString;
-                    if (!picked) return;
-                    setDraftDate(picked);
                   }}
                 />
-
-                <View style={styles.modalFooter}>
-                  <TouchableOpacity
-                    activeOpacity={0.9}
-                    style={styles.modalGhost}
-                    onPress={() => setDraftDate(null)}
-                  >
-                    <Text style={styles.modalGhostText}>Reset</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    activeOpacity={0.9}
-                    style={styles.modalPrimary}
-                    onPress={() => {
-                      if (!draftDate) return;
-                      setAppointmentDate(draftDate);
-                      setIsCalendarOpen(false);
-                    }}
-                  >
-                    <Text style={styles.modalPrimaryText}>Use date</Text>
-                  </TouchableOpacity>
-                </View>
               </View>
-            </Modal>
-          </BottomSheetScrollView>
-        </BottomSheet>
-      );
-    }
-  );
-  
-  export default AddAppointmentSheet;
-  
-  const styles = StyleSheet.create({
-    sheetBackground: {
-      backgroundColor: "#fff",
-      borderTopLeftRadius: 30,
-      borderTopRightRadius: 30,
-    },
-  
-    content: {
-      padding: 20,
-      paddingBottom: 100,
-    },
-  
-    title: {
-      fontSize: 30,
-      fontWeight: "800",
-      marginBottom: 20,
-    },
-  
-    label: {
-      marginTop: 15,
-      marginBottom: 8,
-      fontWeight: "700",
-    },
-  
-    input: {
-      backgroundColor: "#f3f4f6",
-      padding: 15,
-      borderRadius: 14,
-    },
+            </View>
+          </Modal>
+        </BottomSheetScrollView>
+      </BottomSheet>
+    );
+  }
+);
 
-    datePickRow: {
-      backgroundColor: "#f3f4f6",
-      borderRadius: 14,
-      paddingHorizontal: 14,
-      height: 52,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-    },
+AddAppointmentSheet.displayName = "AddAppointmentSheet";
 
-    datePickLeft: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 10,
-      flex: 1,
-      minWidth: 0,
-      paddingRight: 10,
-    },
+export default AddAppointmentSheet;
 
-    datePickText: {
-      color: "#111827",
-      fontWeight: "700",
-    },
+const styles = StyleSheet.create({
+  sheetBackground: {
+    backgroundColor: "#fff",
+  },
 
-    inputWithIcon: {
-      backgroundColor: "#f3f4f6",
-      borderRadius: 14,
-      paddingHorizontal: 14,
-      height: 52,
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 10,
-    },
+  content: {
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    paddingBottom: 40,
+  },
 
-    inputInline: {
-      flex: 1,
-      padding: 0,
-    },
-  
-    textArea: {
-      backgroundColor: "#f3f4f6",
-      padding: 15,
-      borderRadius: 14,
-      minHeight: 120,
-      textAlignVertical: "top",
-    },
-  
-    row: {
-      flexDirection: "row",
-      gap: 10,
-    },
-  
-    optionButton: {
-      flex: 1,
-      paddingVertical: 12,
-      borderRadius: 12,
-      backgroundColor: "#e5e7eb",
-      alignItems: "center",
-    },
-  
-    activeButton: {
-      backgroundColor: "#111827",
-    },
-  
-    optionText: {
-      fontWeight: "600",
-    },
-  
-    activeText: {
-      color: "#fff",
-    },
-  
-    saveButton: {
-      backgroundColor: "#111827",
-      padding: 18,
-      borderRadius: 16,
-      alignItems: "center",
-      justifyContent: "center",
-      flexDirection: "row",
-      gap: 10,
-      marginTop: 30,
-    },
-  
-    saveText: {
-      color: "#fff",
-      fontWeight: "700",
-      fontSize: 16,
-    },
+  header: {
+    marginBottom: 24,
+  },
 
-    modalBackdrop: {
-      flex: 1,
-      backgroundColor: "rgba(15, 23, 42, 0.35)",
-    },
+  title: {
+    fontSize: 24,
+    fontWeight: "900",
+    color: "#0f172a",
+    marginBottom: 4,
+  },
 
-    modalSheet: {
-      backgroundColor: "#ffffff",
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      overflow: "hidden",
-      paddingBottom: 16,
-    },
+  subtitle: {
+    fontSize: 13,
+    color: "#64748b",
+    fontWeight: "600",
+  },
 
-    modalHeader: {
-      paddingHorizontal: 16,
-      paddingTop: 14,
-      paddingBottom: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: "#f1f5f9",
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: 12,
-    },
+  section: {
+    marginBottom: 24,
+  },
 
-    modalTitle: {
-      color: "#0f172a",
-      fontWeight: "900",
-      fontSize: 16,
-    },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "900",
+    color: "#0f172a",
+    marginBottom: 12,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
 
-    modalSubtitle: {
-      color: "#64748b",
-      fontWeight: "600",
-      marginTop: 2,
-    },
+  inputGroup: {
+    marginBottom: 14,
+  },
 
-    modalClose: {
-      height: 36,
-      width: 36,
-      borderRadius: 12,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: "#f1f5f9",
-      borderWidth: 1,
-      borderColor: "#e2e8f0",
-    },
+  label: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#334155",
+    marginBottom: 8,
+  },
 
-    modalFooter: {
-      paddingHorizontal: 16,
-      paddingTop: 12,
-      flexDirection: "row",
-      gap: 10,
-    },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    gap: 10,
+  },
 
-    modalGhost: {
-      flex: 1,
-      height: 46,
-      borderRadius: 16,
-      backgroundColor: "#f1f5f9",
-      borderWidth: 1,
-      borderColor: "#e2e8f0",
-      alignItems: "center",
-      justifyContent: "center",
-    },
+  input: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 14,
+    color: "#0f172a",
+    fontWeight: "600",
+  },
 
-    modalGhostText: {
-      color: "#334155",
-      fontWeight: "900",
-    },
+  notesInput: {
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    minHeight: 100,
+  },
 
-    modalPrimary: {
-      flex: 1,
-      height: 46,
-      borderRadius: 16,
-      backgroundColor: "#111827",
-      alignItems: "center",
-      justifyContent: "center",
-    },
+  row: {
+    flexDirection: "row",
+    gap: 12,
+  },
 
-    modalPrimaryText: {
-      color: "#ffffff",
-      fontWeight: "900",
-    },
-  });
+  buttonGroup: {
+    flexDirection: "row",
+    gap: 8,
+  },
+
+  typeButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: "#f1f5f9",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    alignItems: "center",
+  },
+
+  typeButtonActive: {
+    backgroundColor: "#3b82f6",
+    borderColor: "#3b82f6",
+  },
+
+  typeButtonText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#64748b",
+  },
+
+  typeButtonTextActive: {
+    color: "#fff",
+  },
+
+  buttonContainer: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 24,
+  },
+
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#f1f5f9",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    alignItems: "center",
+  },
+
+  cancelButtonText: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#334155",
+  },
+
+  saveButtonGradient: {
+    flex: 1,
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+
+  saveButton: {
+    paddingVertical: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  saveButtonText: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#fff",
+  },
+
+  datePickerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    gap: 10,
+  },
+
+  datePickerContent: {
+    flex: 1,
+  },
+
+  datePickerLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#94a3b8",
+    marginBottom: 2,
+  },
+
+  datePickerValue: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#0f172a",
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(15, 23, 42, 0.5)",
+    justifyContent: "flex-end",
+  },
+
+  modalContent: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingBottom: 20,
+  },
+
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e2e8f0",
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#0f172a",
+  },
+
+  modalCloseBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#f1f5f9",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

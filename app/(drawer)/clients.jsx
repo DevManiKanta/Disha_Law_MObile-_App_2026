@@ -443,6 +443,9 @@ import {
             <TouchableOpacity
               activeOpacity={0.8}
               style={styles.card}
+              onPress={() => {
+                router.push(`/(drawer)/clients/${item.id}`);
+              }}
             >
               {/* TOP */}
               <View style={styles.cardTop}>

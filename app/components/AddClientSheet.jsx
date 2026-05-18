@@ -315,26 +315,31 @@ const AddClientSheet = forwardRef((props, ref) => {
         </View>
 
         {/* SAVE */}
-        <View style={styles.actionsRow}>
+        <View style={styles.actionsContainer}>
           <TouchableOpacity
             style={styles.secondaryButton}
-            activeOpacity={0.9}
+            activeOpacity={0.85}
             onPress={() => {
               props?.onCreateAppointment?.({ name: fullName, phone });
             }}
           >
-            <Ionicons name="calendar-outline" size={18} color="#0f172a" style={{ marginRight: 8 }} />
-            <Text style={styles.secondaryText}>Create Appointment</Text>
+            <Ionicons name="calendar-outline" size={20} color="#3b82f6" />
+            <View style={styles.buttonTextContainer}>
+              <Text style={styles.secondaryLabel}>Create</Text>
+              <Text style={styles.secondaryText}>Appointment</Text>
+            </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.saveButton} activeOpacity={0.9}>
+          <TouchableOpacity style={styles.saveButton} activeOpacity={0.85}>
             <Ionicons
               name="checkmark-done"
               size={20}
               color="#fff"
-              style={{ marginRight: 8 }}
             />
-            <Text style={styles.saveText}>Save Client</Text>
+            <View style={styles.buttonTextContainer}>
+              <Text style={styles.saveLabel}>Save</Text>
+              <Text style={styles.saveText}>Client</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </BottomSheetScrollView>
@@ -514,13 +519,13 @@ const styles = StyleSheet.create({
   saveButton: {
     backgroundColor: "#3b82f6",
     paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     borderRadius: 14,
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 26,
+    gap: 12,
     shadowColor: "#3b82f6",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
@@ -528,17 +533,24 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
 
-  saveText: {
+  saveLabel: {
     color: "#fff",
     fontWeight: "800",
-    fontSize: 16,
-    letterSpacing: 0.3,
+    fontSize: 13,
   },
 
-  actionsRow: {
+  saveText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 12,
+    opacity: 0.9,
+  },
+
+  actionsContainer: {
     flexDirection: "row",
     gap: 12,
-    marginTop: 26,
+    marginTop: 28,
+    marginBottom: 20,
   },
 
   secondaryButton: {
@@ -546,17 +558,35 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderRadius: 14,
-    backgroundColor: "#f1f5f9",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
+    backgroundColor: "#eff6ff",
+    borderWidth: 1.5,
+    borderColor: "#bfdbfe",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 12,
+  },
+
+  buttonTextContainer: {
+    alignItems: "flex-start",
+  },
+
+  secondaryLabel: {
+    color: "#3b82f6",
+    fontWeight: "800",
+    fontSize: 13,
   },
 
   secondaryText: {
-    color: "#0f172a",
-    fontWeight: "900",
-    fontSize: 14,
+    color: "#3b82f6",
+    fontWeight: "600",
+    fontSize: 12,
+    opacity: 0.8,
+  },
+
+  actionsRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 26,
   },
 });

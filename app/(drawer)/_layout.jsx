@@ -1,207 +1,22 @@
-// import { Drawer } from "expo-router/drawer";
-// import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
-// import { Ionicons } from "@expo/vector-icons";
-// import { LinearGradient } from "expo-linear-gradient";
-// import { StyleSheet, Text, View } from "react-native";
-// import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-// function CustomDrawerContent(props) {
-//   const insets = useSafeAreaInsets();
-//   return (
-//     <DrawerContentScrollView
-//       {...props}
-//       contentContainerStyle={styles.drawerContent}
-//       showsVerticalScrollIndicator={false}
-//     >
-//       <LinearGradient
-//         colors={["#0f172a", "#111827"]}
-//         start={{ x: 0, y: 0 }}
-//         end={{ x: 1, y: 1 }}
-//         style={[styles.brandHeader, { paddingTop: Math.max(insets.top, 12) + 16 }]}
-//       >
-//         <View style={styles.logoCircle}>
-//           <Ionicons name="briefcase-outline" size={22} color="#0f172a" />
-//         </View>
-
-//         <View style={styles.brandText}>
-//           <Text style={styles.appName}>FirstApp</Text>
-//           <Text style={styles.tagline}>Clients • Calls • Appointments</Text>
-//         </View>
-//       </LinearGradient>
-
-//       <View style={styles.drawerList}>
-//         <DrawerItemList {...props} />
-//       </View>
-
-//       <View style={styles.drawerFooter}>
-//         <Text style={styles.footerText}>Built with Expo</Text>
-//       </View>
-//     </DrawerContentScrollView>
-//   );
-// }
-
-// export default function DrawerLayout() {
-//   return (
-//     <Drawer
-//       drawerContent={(props) => <CustomDrawerContent {...props} />}
-//       screenOptions={{
-//         headerShown: true,
-//         headerTitleAlign: "left",
-//         headerStyle: { backgroundColor: "#f8fafc" },
-//         headerTitleStyle: {
-//           fontWeight: "900",
-//           color: "#0f172a",
-//         },
-//         headerTintColor: "#0f172a",
-//         sceneContainerStyle: { backgroundColor: "#f8fafc" },
-
-//         drawerType: "front",
-//         drawerStyle: {
-//           backgroundColor: "#ffffff",
-//           width: 300,
-//         },
-//         drawerActiveTintColor: "#0f172a",
-//         drawerInactiveTintColor: "#475569",
-//         drawerLabelStyle: {
-//           fontWeight: "800",
-//           fontSize: 14,
-//         },
-//         drawerItemStyle: {
-//           borderRadius: 14,
-//           marginHorizontal: 12,
-//           marginVertical: 4,
-//         },
-//       }}
-//     >
-//       <Drawer.Screen
-//         name="(tabs)"
-//         options={{
-//           title: "Home",
-//           drawerLabel: "Home",
-//           drawerIcon: ({ color, size }) => (
-//             <Ionicons name="home-outline" color={color} size={size} />
-//           ),
-//         }}
-//       />
-
-//       <Drawer.Screen
-//         name="clients"
-//         options={{
-//           title: "Clients",
-//           drawerLabel: "Clients",
-//           drawerIcon: ({ color, size }) => (
-//             <Ionicons name="people-outline" color={color} size={size} />
-//           ),
-//         }}
-//       />
-
-//       <Drawer.Screen
-//         name="appointments"
-//         options={{
-//           title: "Appointments",
-//           drawerLabel: "Appointments",
-//           drawerIcon: ({ color, size }) => (
-//             <Ionicons name="calendar-outline" color={color} size={size} />
-//           ),
-//         }}
-//       />
-
-//       <Drawer.Screen
-//         name="contact"
-//         options={{
-//           title: "Contact",
-//           drawerLabel: "Contact",
-//           drawerIcon: ({ color, size }) => (
-//             <Ionicons name="mail-outline" color={color} size={size} />
-//           ),
-//         }}
-//       />
-//     </Drawer>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   drawerContent: {
-//     paddingTop: 0,
-//   },
-
-//   brandHeader: {
-//     paddingTop: 24,
-//     paddingBottom: 16,
-//     paddingHorizontal: 16,
-//     borderBottomLeftRadius: 22,
-//     borderBottomRightRadius: 22,
-//     marginBottom: 10,
-//   },
-
-//   logoCircle: {
-//     height: 44,
-//     width: 44,
-//     borderRadius: 16,
-//     backgroundColor: "#ffffff",
-//     alignItems: "center",
-//     justifyContent: "center",
-//     borderWidth: 1,
-//     borderColor: "rgba(255,255,255,0.15)",
-//   },
-
-//   brandText: {
-//     marginTop: 12,
-//   },
-
-//   appName: {
-//     color: "#ffffff",
-//     fontWeight: "900",
-//     fontSize: 18,
-//     letterSpacing: 0.2,
-//   },
-
-//   tagline: {
-//     color: "rgba(255,255,255,0.75)",
-//     marginTop: 4,
-//     fontWeight: "600",
-//   },
-
-//   drawerList: {
-//     paddingTop: 6,
-//   },
-
-//   drawerFooter: {
-//     paddingHorizontal: 16,
-//     paddingTop: 10,
-//     paddingBottom: 14,
-//   },
-
-//   footerText: {
-//     color: "#94a3b8",
-//     fontWeight: "700",
-//     fontSize: 12,
-//   },
-// });
-
-
-
 import { Drawer } from "expo-router/drawer";
-
 import {
   DrawerContentScrollView,
   DrawerItemList,
 } from "@react-navigation/drawer";
-
 import { Ionicons } from "@expo/vector-icons";
-
-import { LinearGradient } from "expo-linear-gradient";
-
 import {
   StyleSheet,
   Text,
   View,
 } from "react-native";
-
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import Animated, {
+  FadeInLeft,
+  FadeInDown,
+} from "react-native-reanimated";
 
 function CustomDrawerContent(props) {
   const insets = useSafeAreaInsets();
@@ -215,55 +30,67 @@ function CustomDrawerContent(props) {
         {...props}
         contentContainerStyle={[
           styles.drawerContent,
-          { paddingBottom: Math.max(insets.bottom, 14) },
+          { paddingBottom: Math.max(insets.bottom, 20) },
         ]}
         showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
       >
-        {/* HEADER */}
-        <LinearGradient
-          colors={["#0f172a", "#111827"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[
-            styles.brandHeader,
-            {
-              paddingTop: insets.top + 20,
-            },
-          ]}
+        {/* HEADER SECTION */}
+        <Animated.View
+          entering={FadeInDown.duration(600)}
+          style={styles.headerSection}
         >
-          <View style={styles.logoCircle}>
-            <Ionicons
-              name="briefcase-outline"
-              size={22}
-              color="#0f172a"
-            />
+          <View style={styles.logoBox}>
+            <View style={styles.logoCircle}>
+              <Ionicons
+                name="briefcase-outline"
+                size={28}
+                color="#3b82f6"
+              />
+            </View>
           </View>
 
-          <View style={styles.brandText}>
-            <Text style={styles.appName}>
-              FirstApp
-            </Text>
+          <Animated.View
+            style={styles.brandText}
+            entering={FadeInLeft.duration(700).delay(100)}
+          >
+            <Text style={styles.appName}>Disha Law</Text>
+            <Text style={styles.tagline}>Clients • Calls • Appointments</Text>
+          </Animated.View>
+        </Animated.View>
 
-            <Text style={styles.tagline}>
-              Clients • Calls • Appointments
-            </Text>
-          </View>
-        </LinearGradient>
-
-        {/* DRAWER ITEMS */}
-        <View style={styles.drawerList}>
+        {/* MENU SECTION */}
+        <Animated.View
+          style={styles.drawerList}
+          entering={FadeInLeft.duration(800).delay(100)}
+        >
           <Text style={styles.sectionLabel}>Menu</Text>
           <DrawerItemList {...props} />
-        </View>
+        </Animated.View>
 
-        {/* FOOTER */}
-        <View style={styles.drawerFooter}>
-          <View style={styles.footerRow}>
-            <Ionicons name="shield-checkmark-outline" size={16} color="#94a3b8" />
-            <Text style={styles.footerText}>Secure local CRM</Text>
+        {/* FOOTER SECTION */}
+        <Animated.View
+          style={styles.drawerFooter}
+          entering={FadeInLeft.duration(800).delay(200)}
+        >
+          <View style={styles.footerCard}>
+            <View style={styles.footerIcon}>
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={18}
+                color="#10b981"
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.footerTitle}>Secure & Private</Text>
+              <Text style={styles.footerSub}>
+                Your data is encrypted locally
+              </Text>
+            </View>
           </View>
-          <Text style={styles.footerSub}>Built with Expo • v1.0</Text>
-        </View>
+
+          <Text style={styles.footerVersion}>FirstApp v1.0.0</Text>
+        </Animated.View>
       </DrawerContentScrollView>
     </SafeAreaView>
   );
@@ -277,118 +104,148 @@ export default function DrawerLayout() {
       )}
       screenOptions={{
         headerShown: true,
-
         headerTitleAlign: "left",
-
         headerStyle: {
           backgroundColor: "#f8fafc",
+          borderBottomWidth: 1,
+          borderBottomColor: "#e2e8f0",
         },
-
         headerTitleStyle: {
           fontWeight: "900",
           color: "#0f172a",
+          fontSize: 18,
         },
-
         headerTintColor: "#0f172a",
-
+        headerShadowVisible: false,
         sceneContainerStyle: {
           backgroundColor: "#f8fafc",
         },
-
-        drawerType: "front",
-
+        drawerType: "slide",
         drawerStyle: {
           backgroundColor: "#ffffff",
-          width: 300,
+          width: 280,
         },
-
-        drawerActiveTintColor: "#0f172a",
-
-        drawerInactiveTintColor: "#475569",
-
-        drawerActiveBackgroundColor: "#eef2ff",
-
+        drawerActiveTintColor: "#3b82f6",
+        drawerInactiveTintColor: "#64748b",
+        drawerActiveBackgroundColor: "#eff6ff",
         drawerLabelStyle: {
-          fontWeight: "800",
-          fontSize: 14,
+          fontWeight: "700",
+          fontSize: 15,
+          marginLeft: -8,
         },
-
         drawerItemStyle: {
-          borderRadius: 14,
-          marginHorizontal: 12,
-          marginVertical: 4,
+          borderRadius: 10,
+          marginHorizontal: 10,
+          marginVertical: 6,
+          paddingHorizontal: 14,
+          paddingVertical: 14,
         },
       }}
     >
-      {/* HOME */}
       <Drawer.Screen
         name="(tabs)"
         options={{
           title: "Home",
-
           drawerLabel: "Home",
-
-          drawerIcon: ({ color, size }) => (
+          drawerIcon: ({ color }) => (
             <Ionicons
               name="home-outline"
               color={color}
-              size={size}
+              size={24}
             />
           ),
         }}
       />
 
-      {/* CLIENTS */}
+      <Drawer.Screen
+        name="punch"
+        options={{
+          title: "Punch In/Out",
+          drawerLabel: "Punch In/Out",
+          drawerIcon: ({ color }) => (
+            <Ionicons
+              name="log-in-outline"
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="attendance"
+        options={{
+          title: "Attendance Sheet",
+          drawerLabel: "Attendance Sheet",
+          drawerIcon: ({ color }) => (
+            <Ionicons
+              name="calendar-outline"
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+
       <Drawer.Screen
         name="clients"
         options={{
           title: "Clients",
-
           drawerLabel: "Clients",
-
-          drawerIcon: ({ color, size }) => (
+          drawerIcon: ({ color }) => (
             <Ionicons
               name="people-outline"
               color={color}
-              size={size}
+              size={24}
             />
           ),
         }}
       />
 
-      {/* APPOINTMENTS */}
+      <Drawer.Screen
+        name="followups"
+        options={{
+          title: "Follow-ups",
+          drawerLabel: "Follow-ups",
+          drawerIcon: ({ color }) => (
+            <Ionicons
+              name="chatbubbles-outline"
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+
       <Drawer.Screen
         name="appointments"
         options={{
           title: "Appointments",
-
           drawerLabel: "Appointments",
-
-          drawerIcon: ({ color, size }) => (
+          drawerIcon: ({ color }) => (
             <Ionicons
               name="calendar-outline"
               color={color}
-              size={size}
+              size={24}
             />
           ),
         }}
       />
 
-      {/* CONTACT */}
+      {/* HIDDEN DETAIL SCREENS - Not shown in drawer */}
       <Drawer.Screen
-        name="contact"
+        name="appointments/[id]"
         options={{
-          title: "Contact",
+          drawerItemStyle: { display: "none" },
+          title: "Appointment Details",
+        }}
+      />
 
-          drawerLabel: "Contact",
-
-          drawerIcon: ({ color, size }) => (
-            <Ionicons
-              name="mail-outline"
-              color={color}
-              size={size}
-            />
-          ),
+      <Drawer.Screen
+        name="clients/[id]"
+        options={{
+          drawerItemStyle: { display: "none" },
+          title: "Client Details",
         }}
       />
     </Drawer>
@@ -406,95 +263,109 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
 
-  brandHeader: {
-    marginTop: 10,
-
-    paddingBottom: 18,
-    paddingHorizontal: 18,
-
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-
-    marginHorizontal: 10,
+  headerSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e2e8f0",
     marginBottom: 12,
+  },
 
-    shadowColor: "#0f172a",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.22,
-    shadowRadius: 18,
-    elevation: 6,
+  logoBox: {
+    marginBottom: 14,
   },
 
   logoCircle: {
-    height: 50,
-    width: 50,
-    borderRadius: 18,
-
-    backgroundColor: "#ffffff",
-
+    height: 52,
+    width: 52,
+    borderRadius: 14,
+    backgroundColor: "#eff6ff",
     alignItems: "center",
     justifyContent: "center",
-
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
+    borderWidth: 1.5,
+    borderColor: "#bfdbfe",
   },
 
   brandText: {
-    marginTop: 14,
+    gap: 4,
   },
 
   appName: {
-    color: "#ffffff",
+    color: "#0f172a",
     fontWeight: "900",
     fontSize: 20,
     letterSpacing: 0.3,
   },
 
   tagline: {
-    color: "rgba(255,255,255,0.75)",
-    marginTop: 5,
-    fontWeight: "600",
-    fontSize: 13,
+    color: "#64748b",
+    fontWeight: "500",
+    fontSize: 12.5,
   },
 
   drawerList: {
-    paddingTop: 10,
+    paddingTop: 4,
+    paddingHorizontal: 0,
   },
 
   sectionLabel: {
-    marginLeft: 18,
-    marginBottom: 6,
+    marginLeft: 16,
+    marginBottom: 14,
+    marginTop: 8,
     color: "#94a3b8",
-    fontWeight: "900",
-    fontSize: 12,
-    letterSpacing: 1,
+    fontWeight: "800",
+    fontSize: 11,
+    letterSpacing: 1.2,
     textTransform: "uppercase",
   },
 
   drawerFooter: {
     marginTop: "auto",
-
-    paddingHorizontal: 18,
-    paddingBottom: 24,
-    paddingTop: 14,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: "#e2e8f0",
   },
 
-  footerRow: {
+  footerCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 12,
+    backgroundColor: "#f8fafc",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
   },
 
-  footerText: {
-    color: "#94a3b8",
-    fontWeight: "900",
-    fontSize: 12.5,
+  footerIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: "#ecfdf5",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  footerTitle: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#0f172a",
   },
 
   footerSub: {
-    marginTop: 6,
+    fontSize: 11,
+    color: "#94a3b8",
+    fontWeight: "500",
+    marginTop: 2,
+  },
+
+  footerVersion: {
+    fontSize: 11,
     color: "#cbd5e1",
     fontWeight: "700",
-    fontSize: 11.5,
+    textAlign: "center",
   },
 });

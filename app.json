@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "firstapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true
     },
@@ -31,7 +31,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/dishaLOGO.jpeg",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -44,12 +44,12 @@
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": false
     },
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "bcc18218-4abb-441c-9497-1380c5231c97"
+        "projectId": "d422207d-34e3-4e34-b828-043b90e294b8"
       }
     }
   }

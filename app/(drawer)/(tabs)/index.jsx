@@ -1,129 +1,336 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useMemo } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useMemo, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Dimensions,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+import Animated, {
+  FadeInDown,
+  FadeInUp,
+  Layout,
+} from "react-native-reanimated";
+
+const { width } = Dimensions.get("window");
+
+const RECENT_ACTIVITIES = [
+  {
+    id: "1",
+    name: "John Doe",
+    action: "Appointment booked",
+    time: "10:30 AM",
+    type: "Online",
+    icon: "calendar-outline",
+    color: "#3b82f6",
+  },
+  {
+    id: "2",
+    name: "Sarah Smith",
+    action: "Follow-up completed",
+    time: "2:15 PM",
+    type: "Call",
+    icon: "call-outline",
+    color: "#10b981",
+  },
+  {
+    id: "3",
+    name: "Michael Brown",
+    action: "New client added",
+    time: "Yesterday",
+    type: "Client",
+    icon: "person-add-outline",
+    color: "#f59e0b",
+  },
+];
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const [activeTab, setActiveTab] = useState("overview");
 
-  // Demo stats (replace with real storage/API later)
   const stats = useMemo(() => {
     const totalClients = 24;
     const totalCalls = 57;
     const appointmentsToday = 3;
     const followupsToday = 5;
-    return { totalClients, totalCalls, appointmentsToday, followupsToday };
+    const conversionRate = 68;
+    return {
+      totalClients,
+      totalCalls,
+      appointmentsToday,
+      followupsToday,
+      conversionRate,
+    };
   }, []);
+
+  const renderKPICard = (icon, label, value, hint, bgColor, textColor) => (
+    <Animated.View
+      style={styles.kpiCard}
+      entering={FadeInUp.duration(600).delay(100)}
+      layout={Layout.springify()}
+    >
+      <LinearGradient
+        colors={bgColor}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.kpiGradient}
+      >
+        <View style={styles.kpiContent}>
+          <View style={styles.kpiHeader}>
+            <View style={[styles.kpiIconBox, { backgroundColor: textColor }]}>
+              <Ionicons name={icon} size={20} color="#fff" />
+            </View>
+            <Text style={[styles.kpiLabel, { color: textColor }]}>{label}</Text>
+          </View>
+          <Text style={[styles.kpiValue, { color: textColor }]}>{value}</Text>
+          {hint && (
+            <Text style={[styles.kpiHint, { color: textColor }]}>
+              {hint}
+            </Text>
+          )}
+        </View>
+      </LinearGradient>
+    </Animated.View>
+  );
 
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={[
         styles.content,
-        { paddingTop: Math.max(insets.top + 10, 12), paddingBottom: Math.max(insets.bottom + 18, 18) },
+        {
+          paddingTop: Math.max(insets.top + 16, 16),
+          paddingBottom: Math.max(insets.bottom + 100, 100),
+        },
       ]}
       showsVerticalScrollIndicator={false}
+      scrollEventThrottle={16}
     >
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.title}>Dashboard</Text>
-          <Text style={styles.subtitle}>Quick overview of your day</Text>
-        </View>
-        <View style={styles.headerBadge}>
-          <Ionicons name="sparkles-outline" size={16} color="#0f172a" />
-          <Text style={styles.headerBadgeText}>Today</Text>
-        </View>
-      </View>
-
-      <View style={styles.grid}>
-        <View style={[styles.kpiCard, { backgroundColor: "#0f172a" }]}>
-          <View style={styles.kpiTop}>
-            <Ionicons name="call-outline" size={18} color="#fff" />
-            <Text style={[styles.kpiLabel, { color: "rgba(255,255,255,0.75)" }]}>Total Calls</Text>
+      {/* Header Section */}
+      <Animated.View
+        style={styles.headerSection}
+        entering={FadeInDown.duration(500)}
+      >
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.greeting}>Welcome back</Text>
+            <Text style={styles.title}>Dashboard</Text>
           </View>
-          <Text style={[styles.kpiValue, { color: "#fff" }]}>{stats.totalCalls}</Text>
+          <View style={styles.headerBadge}>
+            <Ionicons name="sparkles" size={16} color="#fff" />
+            <Text style={styles.badgeText}>Today</Text>
+          </View>
         </View>
+        <Text style={styles.subtitle}>
+          Here's your performance overview
+        </Text>
+      </Animated.View>
 
-        <View style={styles.kpiCard}>
-          <View style={styles.kpiTop}>
-            <Ionicons name="people-outline" size={18} color="#0f172a" />
-            <Text style={styles.kpiLabel}>Clients</Text>
-          </View>
-          <Text style={styles.kpiValue}>{stats.totalClients}</Text>
-        </View>
-
-        <View style={styles.kpiCard}>
-          <View style={styles.kpiTop}>
-            <Ionicons name="calendar-outline" size={18} color="#0f172a" />
-            <Text style={styles.kpiLabel}>Appointments</Text>
-          </View>
-          <Text style={styles.kpiValue}>{stats.appointmentsToday}</Text>
-          <Text style={styles.kpiHint}>Today</Text>
-        </View>
-
-        <View style={styles.kpiCard}>
-          <View style={styles.kpiTop}>
-            <Ionicons name="chatbubble-ellipses-outline" size={18} color="#0f172a" />
-            <Text style={styles.kpiLabel}>Follow-ups</Text>
-          </View>
-          <Text style={styles.kpiValue}>{stats.followupsToday}</Text>
-          <Text style={styles.kpiHint}>Today</Text>
-        </View>
-      </View>
-
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Quick actions</Text>
-        <Text style={styles.sectionSub}>Add records faster</Text>
-      </View>
-
-      <View style={styles.actionsRow}>
-        <TouchableOpacity
-          activeOpacity={0.9}
-          style={styles.actionCard}
-          onPress={() => {
-            router.push("/(drawer)/(tabs)/add-client");
-          }}
-        >
-          <View style={styles.actionIcon}>
-            <Ionicons name="person-add-outline" size={18} color="#0f172a" />
-          </View>
-          <Text style={styles.actionTitle}>Add Client</Text>
-          <Text style={styles.actionSub}>Create a new client</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.9}
-          style={styles.actionCard}
-          onPress={() => {
-            router.push("/(drawer)/(tabs)/appointments");
-          }}
-        >
-          <View style={styles.actionIcon}>
-            <Ionicons name="calendar-clear-outline" size={18} color="#0f172a" />
-          </View>
-          <Text style={styles.actionTitle}>Add Appointment</Text>
-          <Text style={styles.actionSub}>Book a meeting</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Recent</Text>
-        <Text style={styles.sectionSub}>Latest activity</Text>
-      </View>
-
-      <View style={styles.recentCard}>
-        <View style={styles.recentRow}>
-          <View style={styles.recentDot} />
-          <View style={{ flex: 1, minWidth: 0 }}>
-            <Text style={styles.recentTitle} numberOfLines={1}>
-              John Doe • Appointment booked
+      {/* Tab Navigation */}
+      <View style={styles.tabContainer}>
+        {["overview", "analytics"].map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            style={[
+              styles.tab,
+              activeTab === tab && styles.activeTab,
+            ]}
+            onPress={() => setActiveTab(tab)}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === tab && styles.activeTabText,
+              ]}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </Text>
-            <Text style={styles.recentSub}>10:30 AM • Online</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
-        </View>
+            {activeTab === tab && <View style={styles.tabIndicator} />}
+          </TouchableOpacity>
+        ))}
       </View>
+
+      {/* KPI Grid */}
+      <View style={styles.gridContainer}>
+        {renderKPICard(
+          "call-outline",
+          "Total Calls",
+          stats.totalCalls,
+          null,
+          ["#3b82f6", "#2563eb"],
+          "#fff"
+        )}
+        {renderKPICard(
+          "people-outline",
+          "Clients",
+          stats.totalClients,
+          null,
+          ["#10b981", "#059669"],
+          "#fff"
+        )}
+        {renderKPICard(
+          "calendar-outline",
+          "Appointments",
+          stats.appointmentsToday,
+          "Today",
+          ["#f59e0b", "#d97706"],
+          "#fff"
+        )}
+        {renderKPICard(
+          "chatbubble-ellipses-outline",
+          "Follow-ups",
+          stats.followupsToday,
+          "Today",
+          ["#8b5cf6", "#7c3aed"],
+          "#fff"
+        )}
+      </View>
+
+      {/* Conversion Rate Card */}
+      <Animated.View
+        style={styles.conversionCard}
+        entering={FadeInUp.duration(600).delay(200)}
+      >
+        <LinearGradient
+          colors={["#1e293b", "#0f172a"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.conversionGradient}
+        >
+          <View style={styles.conversionContent}>
+            <View style={styles.conversionLeft}>
+              <Text style={styles.conversionLabel}>Conversion Rate</Text>
+              <Text style={styles.conversionValue}>{stats.conversionRate}%</Text>
+              <Text style={styles.conversionSub}>+5% from last week</Text>
+            </View>
+            <View style={styles.conversionChart}>
+              <View
+                style={[
+                  styles.chartBar,
+                  { height: `${stats.conversionRate}%` },
+                ]}
+              />
+            </View>
+          </View>
+        </LinearGradient>
+      </Animated.View>
+
+      {/* Quick Actions */}
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        <Text style={styles.sectionSub}>Manage your workflow</Text>
+      </View>
+
+      <View style={styles.actionsGrid}>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={styles.actionCard}
+          onPress={() => router.push("/(drawer)/(tabs)/add-client")}
+        >
+          <LinearGradient
+            colors={["#3b82f6", "#2563eb"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.actionGradient}
+          >
+            <Ionicons name="person-add-outline" size={24} color="#fff" />
+            <Text style={styles.actionTitle}>Add Client</Text>
+            <Text style={styles.actionSub}>Create new</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={styles.actionCard}
+          onPress={() => router.push("/(drawer)/(tabs)/appointments")}
+        >
+          <LinearGradient
+            colors={["#10b981", "#059669"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.actionGradient}
+          >
+            <Ionicons name="calendar-clear-outline" size={24} color="#fff" />
+            <Text style={styles.actionTitle}>Appointment</Text>
+            <Text style={styles.actionSub}>Schedule</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+
+      {/* Recent Activity */}
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Recent Activity</Text>
+        <TouchableOpacity>
+          <Text style={styles.viewAll}>View All</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.activityList}>
+        {RECENT_ACTIVITIES.map((activity, index) => (
+          <Animated.View
+            key={activity.id}
+            style={styles.activityItem}
+            entering={FadeInUp.duration(500).delay(index * 100)}
+          >
+            <View
+              style={[
+                styles.activityIcon,
+                { backgroundColor: `${activity.color}20` },
+              ]}
+            >
+              <Ionicons
+                name={activity.icon}
+                size={18}
+                color={activity.color}
+              />
+            </View>
+            <View style={styles.activityContent}>
+              <Text style={styles.activityName}>{activity.name}</Text>
+              <Text style={styles.activityAction}>{activity.action}</Text>
+            </View>
+            <View style={styles.activityMeta}>
+              <Text style={styles.activityTime}>{activity.time}</Text>
+              <View
+                style={[
+                  styles.activityBadge,
+                  { backgroundColor: `${activity.color}15` },
+                ]}
+              >
+                <Text style={[styles.activityBadgeText, { color: activity.color }]}>
+                  {activity.type}
+                </Text>
+              </View>
+            </View>
+          </Animated.View>
+        ))}
+      </View>
+
+      {/* Footer Stats */}
+      <Animated.View
+        style={styles.footerStats}
+        entering={FadeInUp.duration(600).delay(300)}
+      >
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>92%</Text>
+          <Text style={styles.statLabel}>Client Satisfaction</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>156</Text>
+          <Text style={styles.statLabel}>Calls This Month</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>18</Text>
+          <Text style={styles.statLabel}>Pending Follow-ups</Text>
+        </View>
+      </Animated.View>
     </ScrollView>
   );
 }
@@ -135,188 +342,373 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
   },
 
-  header: {
+  headerSection: {
+    marginBottom: 24,
+  },
+
+  headerTop: {
     flexDirection: "row",
-    alignItems: "flex-end",
     justifyContent: "space-between",
-    marginBottom: 14,
+    alignItems: "flex-start",
+    marginBottom: 12,
   },
 
-  headerLeft: {
-    flex: 1,
-    paddingRight: 12,
+  greeting: {
+    fontSize: 14,
+    color: "#64748b",
+    fontWeight: "600",
+    marginBottom: 4,
   },
 
   title: {
-    fontSize: 30,
+    fontSize: 32,
     fontWeight: "900",
     color: "#0f172a",
-    letterSpacing: -0.3,
-  },
-
-  subtitle: {
-    marginTop: 4,
-    color: "#64748b",
-    fontWeight: "600",
+    letterSpacing: -0.5,
   },
 
   headerBadge: {
-    height: 34,
-    paddingHorizontal: 12,
-    borderRadius: 999,
-    backgroundColor: "#f1f5f9",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#3b82f6",
   },
 
-  headerBadgeText: {
+  badgeText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 12,
+  },
+
+  subtitle: {
+    fontSize: 14,
+    color: "#64748b",
+    fontWeight: "500",
+  },
+
+  tabContainer: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e2e8f0",
+  },
+
+  tab: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    position: "relative",
+  },
+
+  activeTab: {
+    borderBottomWidth: 3,
+    borderBottomColor: "#3b82f6",
+  },
+
+  tabText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#94a3b8",
+  },
+
+  activeTabText: {
     color: "#0f172a",
-    fontWeight: "900",
-    fontSize: 13,
+    fontWeight: "700",
   },
 
-  grid: {
+  tabIndicator: {
+    position: "absolute",
+    bottom: -1,
+    left: 0,
+    right: 0,
+    height: 3,
+    backgroundColor: "#3b82f6",
+    borderRadius: 1.5,
+  },
+
+  gridContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
-    marginBottom: 16,
+    marginBottom: 20,
   },
 
   kpiCard: {
     width: "48%",
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "#eef2f7",
-    borderRadius: 18,
-    padding: 12,
+    borderRadius: 16,
+    overflow: "hidden",
     shadowColor: "#0f172a",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.06,
-    shadowRadius: 18,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 4,
   },
 
-  kpiTop: {
+  kpiGradient: {
+    padding: 16,
+  },
+
+  kpiContent: {
+    gap: 8,
+  },
+
+  kpiHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
 
+  kpiIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    opacity: 0.3,
+  },
+
   kpiLabel: {
-    color: "#64748b",
-    fontWeight: "800",
     fontSize: 12,
+    fontWeight: "700",
+    opacity: 0.8,
   },
 
   kpiValue: {
-    marginTop: 10,
-    color: "#0f172a",
-    fontWeight: "900",
     fontSize: 28,
-    letterSpacing: -0.2,
+    fontWeight: "900",
+    letterSpacing: -0.5,
   },
 
   kpiHint: {
-    marginTop: 4,
+    fontSize: 11,
+    fontWeight: "600",
+    opacity: 0.7,
+  },
+
+  conversionCard: {
+    marginBottom: 24,
+    borderRadius: 16,
+    overflow: "hidden",
+    shadowColor: "#0f172a",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+
+  conversionGradient: {
+    padding: 20,
+  },
+
+  conversionContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  conversionLeft: {
+    flex: 1,
+  },
+
+  conversionLabel: {
+    fontSize: 13,
     color: "#94a3b8",
-    fontWeight: "800",
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+
+  conversionValue: {
+    fontSize: 36,
+    fontWeight: "900",
+    color: "#fff",
+    letterSpacing: -0.5,
+  },
+
+  conversionSub: {
     fontSize: 12,
+    color: "#10b981",
+    fontWeight: "600",
+    marginTop: 4,
+  },
+
+  conversionChart: {
+    width: 60,
+    height: 80,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 8,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    padding: 8,
+  },
+
+  chartBar: {
+    width: "100%",
+    backgroundColor: "#3b82f6",
+    borderRadius: 4,
   },
 
   sectionHeader: {
-    marginTop: 10,
-    marginBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
   },
 
   sectionTitle: {
-    color: "#0f172a",
+    fontSize: 16,
     fontWeight: "900",
-    fontSize: 14,
+    color: "#0f172a",
   },
 
   sectionSub: {
-    marginTop: 4,
+    fontSize: 12,
     color: "#64748b",
-    fontWeight: "600",
-    fontSize: 12.5,
+    fontWeight: "500",
   },
 
-  actionsRow: {
+  viewAll: {
+    fontSize: 13,
+    color: "#3b82f6",
+    fontWeight: "700",
+  },
+
+  actionsGrid: {
     flexDirection: "row",
     gap: 12,
+    marginBottom: 28,
   },
 
   actionCard: {
     flex: 1,
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "#eef2f7",
-    borderRadius: 18,
-    padding: 12,
+    borderRadius: 16,
+    overflow: "hidden",
+    shadowColor: "#0f172a",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 4,
   },
 
-  actionIcon: {
-    height: 36,
-    width: 36,
-    borderRadius: 14,
-    backgroundColor: "#f1f5f9",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    alignItems: "center",
+  actionGradient: {
+    padding: 20,
     justifyContent: "center",
-    marginBottom: 10,
+    alignItems: "center",
+    gap: 8,
   },
 
   actionTitle: {
-    color: "#0f172a",
-    fontWeight: "900",
-    fontSize: 13.5,
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#fff",
   },
 
   actionSub: {
-    marginTop: 3,
-    color: "#64748b",
-    fontWeight: "600",
-    fontSize: 12,
+    fontSize: 11,
+    color: "rgba(255, 255, 255, 0.8)",
+    fontWeight: "500",
   },
 
-  recentCard: {
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "#eef2f7",
-    borderRadius: 18,
-    padding: 12,
+  activityList: {
+    gap: 12,
+    marginBottom: 24,
   },
 
-  recentRow: {
+  activityItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
   },
 
-  recentDot: {
-    height: 10,
-    width: 10,
-    borderRadius: 999,
-    backgroundColor: "#22c55e",
+  activityIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
   },
 
-  recentTitle: {
-    color: "#0f172a",
-    fontWeight: "900",
+  activityContent: {
+    flex: 1,
+  },
+
+  activityName: {
     fontSize: 13,
+    fontWeight: "700",
+    color: "#0f172a",
+    marginBottom: 2,
   },
 
-  recentSub: {
-    marginTop: 2,
+  activityAction: {
+    fontSize: 12,
+    color: "#64748b",
+    fontWeight: "500",
+  },
+
+  activityMeta: {
+    alignItems: "flex-end",
+    gap: 6,
+  },
+
+  activityTime: {
+    fontSize: 11,
+    color: "#94a3b8",
+    fontWeight: "600",
+  },
+
+  activityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+
+  activityBadgeText: {
+    fontSize: 10,
+    fontWeight: "700",
+  },
+
+  footerStats: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    marginBottom: 20,
+  },
+
+  statItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+
+  statValue: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#0f172a",
+    marginBottom: 4,
+  },
+
+  statLabel: {
+    fontSize: 11,
     color: "#64748b",
     fontWeight: "600",
-    fontSize: 12,
+    textAlign: "center",
+  },
+
+  statDivider: {
+    width: 1,
+    backgroundColor: "#e2e8f0",
+    marginHorizontal: 12,
   },
 });
